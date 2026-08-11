@@ -346,11 +346,23 @@ Completed:
 
 ---
 
-### Phase 3 — Next
+### Phase 3 — Complete
 
-Authentication and Authorization.
+Completed:
 
-Target endpoints:
+- separate Patient, Doctor, and Admin authentication;
+- patient registration;
+- patient login by email or phone;
+- doctor and admin login;
+- JWT Bearer access tokens with actor ID and role claims;
+- authenticated current-account lookup;
+- bcrypt password utilities;
+- Zod request validation;
+- authentication and role middleware;
+- narrow Prisma authentication repositories;
+- unit tests for utilities, services, validators, and middleware.
+
+Implemented endpoints:
 
 ```text
 POST /api/v1/auth/patient/register
@@ -360,7 +372,7 @@ POST /api/v1/auth/admin/login
 GET  /api/v1/auth/me
 ```
 
-Expected components:
+Implemented components:
 
 ```text
 auth.controller
@@ -387,10 +399,19 @@ Do not implement consultation endpoints as part of Phase 3.
 
 ---
 
+### Phase 4 — Next
+
+Patient Consultation API.
+
+Phase 4 should implement authenticated patient consultation creation and
+patient-owned consultation reads without expanding into AI processing or doctor
+review behavior.
+
+---
+
 ## 10. Remaining Roadmap
 
 ```text
-Phase 3  Authentication & Authorization
 Phase 4  Patient Consultation
 Phase 5  AI Model Integration
 Phase 6  Doctor Consultation & Review
