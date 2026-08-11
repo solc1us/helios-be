@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 
 import { ConsultationStatus } from "../src/generated/prisma/enums";
+import { DUMMY_AI_OUTPUT } from "../src/adapters/dummyAiModel.adapter";
 
 import type {
 	ConsultationRecord,
@@ -14,6 +15,8 @@ import {
 	ConsultationService,
 	createComplaintPreview,
 } from "../src/services/consultation.service";
+import type { ConsultationProcessor } from "../src/services/aiProcessing.service";
+import type { ValidatedAiModelOutput } from "../src/types/ai.type";
 
 const createdAt = new Date("2026-08-11T10:00:00.000Z");
 const updatedAt = new Date("2026-08-11T10:05:00.000Z");
@@ -25,6 +28,13 @@ const consultation: ConsultationRecord = {
 	doctorId: null,
 	createdAt,
 	updatedAt,
+};
+
+const dummyAiAnalysis: ValidatedAiModelOutput = {
+	...DUMMY_AI_OUTPUT,
+	detected_symptoms: [...DUMMY_AI_OUTPUT.detected_symptoms],
+	duration: DUMMY_AI_OUTPUT.duration ?? null,
+	doctor_note_suggestion: DUMMY_AI_OUTPUT.doctor_note_suggestion ?? null,
 };
 
 function decimal(value: number): DecimalValue {
@@ -43,6 +53,9 @@ const listConsultation: PatientConsultationListRecord = {
 function createService(
 	overrides: Partial<ConsultationRepository> = {},
 	now: () => Date = () => new Date("2026-08-11T10:00:00.000Z"),
+	processor: ConsultationProcessor = {
+		processConsultation: async () => dummyAiAnalysis,
+	},
 ) {
 	const repository = {
 		createForPatient: async () => consultation,
@@ -54,13 +67,18 @@ function createService(
 		...overrides,
 	} as ConsultationRepository;
 
-	return new ConsultationService(repository, now);
+	return new ConsultationService(repository, now, processor);
 }
 
 describe("ConsultationService creation", () => {
-	test("uses the authenticated patient ID and returns submitted status", async () => {
+	test("uses the authenticated patient ID and returns the analyzed dummy result", async () => {
 		const createForPatient = mock(async () => consultation);
-		const service = createService({ createForPatient });
+		const processConsultation = mock(async () => dummyAiAnalysis);
+		const service = createService(
+			{ createForPatient },
+			undefined,
+			{ processConsultation },
+		);
 
 		const result = await service.createForPatient("authenticated-patient", {
 			complaint_text: consultation.complaintText,
@@ -70,7 +88,11 @@ describe("ConsultationService creation", () => {
 			"authenticated-patient",
 			consultation.complaintText,
 		);
-		expect(result.consultation.status).toBe("submitted");
+		expect(processConsultation).toHaveBeenCalledWith(consultation.id);
+		expect(result.consultation.status).toBe("analyzed");
+		expect(result.ai_analysis).toEqual(dummyAiAnalysis);
+		expect(result.ai_analysis).not.toHaveProperty("rawOutput");
+		expect(result.ai_analysis).not.toHaveProperty("processingTimeMs");
 		expect(result.consultation).not.toHaveProperty("patientId");
 		expect(result.consultation).not.toHaveProperty("doctorId");
 	});

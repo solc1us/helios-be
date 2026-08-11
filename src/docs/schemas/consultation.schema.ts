@@ -19,10 +19,13 @@ export const consultationSchemas = {
 		additionalProperties: false,
 		properties: {
 			success: { type: "boolean", enum: [true] },
-			message: { type: "string", enum: ["Konsultasi berhasil dibuat."] },
+			message: {
+				type: "string",
+				enum: ["Konsultasi berhasil dianalisis."],
+			},
 			data: {
 				type: "object",
-				required: ["consultation"],
+				required: ["consultation", "ai_analysis"],
 				additionalProperties: false,
 				properties: {
 					consultation: {
@@ -32,12 +35,65 @@ export const consultationSchemas = {
 						properties: {
 							id: { type: "string", format: "uuid" },
 							complaint_text: { type: "string" },
-							status: { type: "string", enum: ["submitted"] },
+							status: { type: "string", enum: ["analyzed"] },
 							created_at: { type: "string", format: "date-time" },
 						},
 					},
+					ai_analysis: {
+						$ref: "#/components/schemas/TemporaryDummyAiAnalysis",
+					},
 				},
 			},
+		},
+	},
+	TemporaryDummyAiAnalysis: {
+		type: "object",
+		required: [
+			"summary",
+			"detected_symptoms",
+			"duration",
+			"severity_level",
+			"possible_category",
+			"urgency_level",
+			"doctor_note_suggestion",
+			"confidence_score",
+			"model_version",
+		],
+		additionalProperties: false,
+		description:
+			"Temporary direct response from the deterministic dummy AI integration used during development. It is pre-screening decision support, not a final medical diagnosis.",
+		properties: {
+			summary: {
+				type: "string",
+				example:
+					"Pasien mengalami keluhan yang memerlukan evaluasi lebih lanjut oleh dokter.",
+			},
+			detected_symptoms: {
+				type: "array",
+				items: { type: "string" },
+				example: ["demam", "batuk"],
+			},
+			duration: { type: "string", nullable: true, example: "3 hari" },
+			severity_level: { $ref: "#/components/schemas/SeverityLevel" },
+			possible_category: {
+				type: "string",
+				example: "keluhan pernapasan",
+			},
+			urgency_level: { $ref: "#/components/schemas/UrgencyLevel" },
+			doctor_note_suggestion: {
+				type: "string",
+				nullable: true,
+				example:
+					"Disarankan melakukan evaluasi klinis lebih lanjut terhadap kondisi pasien.",
+			},
+			confidence_score: {
+				type: "number",
+				format: "double",
+				minimum: 0,
+				maximum: 1,
+				example: 0.82,
+			},
+			model_version: { type: "string", enum: ["dummy-v1"] },
 		},
 	},
 	PatientConsultationListItem: {

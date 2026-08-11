@@ -32,9 +32,9 @@ export const patientPaths = {
 	"/api/v1/patient/consultations": {
 		post: {
 			tags: ["Patient"],
-			summary: "Create a consultation",
+			summary: "Create and analyze a consultation",
 			description:
-				"Creates a consultation owned by the authenticated patient with submitted status. This endpoint does not start AI processing.",
+				"Creates an owned consultation, synchronously runs the deterministic dummy AI adapter, validates and persists the result, and returns analyzed status. The direct ai_analysis response is a temporary development contract and is not a final medical diagnosis.",
 			operationId: "createPatientConsultation",
 			security: [{ BearerAuth: [] }],
 			requestBody: {
@@ -47,7 +47,7 @@ export const patientPaths = {
 			},
 			responses: {
 				"201": standardResponse(
-					"Consultation created with submitted status.",
+					"Consultation created and analyzed by the development dummy adapter.",
 					"ConsultationCreatedResponse",
 				),
 				...protectedErrors,

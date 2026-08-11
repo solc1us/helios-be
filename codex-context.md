@@ -422,8 +422,8 @@ GET  /api/v1/patient/consultations
 GET  /api/v1/patient/consultations/:id
 ```
 
-Consultations remain in `SUBMITTED` after creation. Phase 4 does not create AI
-analysis records or transition consultations to `PROCESSING`.
+During Phase 4, consultations remained in `SUBMITTED` after creation. Phase 5
+has since extended the create flow with synchronous dummy AI processing.
 
 Phase 4.1 added patient dashboard data to the existing consultation history
 endpoint: lightweight `complaint_text`, doctor-confirmed category, reviewed-only
@@ -442,19 +442,27 @@ disabled by default in production.
 
 ---
 
-### Phase 5 — Next
+### Phase 5 — Dummy AI Integration: Complete
 
-AI Model Integration.
+An `AiModelAdapter` abstraction now isolates model transport from consultation
+processing. The deterministic `DummyAiModelAdapter` is currently wired in;
+Patient consultation creation synchronously transitions `SUBMITTED` to
+`PROCESSING`, validates the dummy output, persists `AiAnalysis`, records system
+audit events, and transitions to `ANALYZED` or `FAILED`. The POST response
+temporarily returns the safe dummy analysis without raw output or processing
+timing. A real model adapter remains deferred.
 
-Phase 5 should implement the internal AI adapter, validated structured output,
-processing status transitions, AI analysis persistence, and failure handling.
+---
+
+### Phase 6 — Next
+
+Doctor Consultation & Review.
 
 ---
 
 ## 10. Remaining Roadmap
 
 ```text
-Phase 5  AI Model Integration
 Phase 6  Doctor Consultation & Review
 Phase 7  Admin Management
 Phase 8  Security & Validation Hardening

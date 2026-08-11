@@ -809,20 +809,35 @@ Authorization: Bearer <patient_token>
 ```json
 {
 	"success": true,
-	"message": "Konsultasi berhasil dibuat.",
+	"message": "Konsultasi berhasil dianalisis.",
 	"data": {
 		"consultation": {
 			"id": "consultation-uuid",
 			"complaint_text": "Saya demam, batuk, dan nyeri tenggorokan sejak 3 hari yang lalu.",
-			"status": "submitted",
+			"status": "analyzed",
 			"created_at": "2026-08-11T10:00:00Z"
+		},
+		"ai_analysis": {
+			"summary": "Pasien mengalami keluhan yang memerlukan evaluasi lebih lanjut oleh dokter.",
+			"detected_symptoms": ["demam", "batuk"],
+			"duration": "3 hari",
+			"severity_level": "medium",
+			"possible_category": "keluhan pernapasan",
+			"urgency_level": "normal",
+			"doctor_note_suggestion": "Disarankan melakukan evaluasi klinis lebih lanjut terhadap kondisi pasien.",
+			"confidence_score": 0.82,
+			"model_version": "dummy-v1"
 		}
 	}
 }
 ```
 
-Pada implementasi Phase 4 saat ini, consultation tetap berstatus `submitted`.
-Endpoint ini tidak memulai AI processing secara otomatis.
+`POST` ini sementara menjalankan `DummyAiModelAdapter` secara synchronous untuk
+development. Alurnya adalah `submitted -> processing -> analyzed`; output dummy
+divalidasi lalu disimpan ke `ai_analyses`. Response `ai_analysis` bersifat
+sementara untuk integrasi frontend dan tidak memuat `raw_output` atau
+`processing_time_ms`. Output ini merupakan pre-screening/decision support, bukan
+diagnosis medis final. Model AI sebenarnya masih ditunda.
 
 ---
 
@@ -1382,6 +1397,12 @@ ke system log serta audit log.
 
 # 9. AI Processing Flow
 
+Implementasi development saat ini menggunakan `DummyAiModelAdapter` yang
+deterministik dan tidak memanggil service eksternal. Adapter dipanggil secara
+synchronous dari flow pembuatan consultation, tetapi tetap berada di balik
+interface `AiModelAdapter` agar model sebenarnya dapat menggantikannya tanpa
+mengubah processing, validasi, persistence, atau controller.
+
 Recommended flow:
 
 ```text
@@ -1391,7 +1412,7 @@ Patient submits complaint
 consultation = submitted
         │
         ▼
-AI processing job created
+Synchronous dummy processing invoked
         │
         ▼
 consultation = processing
@@ -1414,7 +1435,9 @@ consultation = analyzed
 Available for doctor
 ```
 
-API contract sebaiknya tidak bergantung pada kecepatan inference AI. Karena itu, asynchronous processing direkomendasikan apabila inference memiliki waktu proses yang tidak konsisten atau berpotensi lama.
+Untuk dummy integration, API menunggu processing selesai. Strategi asynchronous
+dapat dipertimbangkan nanti ketika transport dan karakteristik runtime model
+sebenarnya sudah tersedia; Phase 5 ini tidak menambahkan queue atau worker.
 
 ---
 
@@ -1605,23 +1628,25 @@ Nama environment untuk AI dapat disesuaikan setelah mekanisme integrasi model su
 
 ---
 
-## Phase 5 — AI Model Integration
+## Phase 5 — Dummy AI Integration
 
-### Prerequisite
-
-Mekanisme komunikasi dengan AI model internal sudah ditentukan.
+Status: complete untuk integrasi dummy development. Transport model internal
+yang sebenarnya belum ditentukan dan tidak ditebak pada fase ini.
 
 ### Tasks
 
 - Implement `aiModel.adapter.ts`.
 - Implement AI output validator.
 - Implement AI processing service.
-- Implement AI processing job/worker jika asynchronous.
+- Jalankan dummy processing secara synchronous dari Patient POST.
 - Save AI analysis.
 - Save model version.
 - Record processing time.
 - Handle AI failure.
 - Implement AI audit events.
+
+`DummyAiModelAdapter` saat ini aktif dan menghasilkan output tetap `dummy-v1`.
+Penggantian ke adapter model sebenarnya merupakan pekerjaan integrasi mendatang.
 
 ### Deliverables
 

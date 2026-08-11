@@ -96,24 +96,36 @@ describe("OpenAPI document", () => {
 			}),
 		);
 
-		const forbiddenPatientFields = [
-			"summary",
-			"detectedSymptoms",
-			"duration",
-			"severityLevel",
-			"possibleCategory",
-			"urgencyLevel",
-			"doctorNoteSuggestion",
-			"modelVersion",
-			"processingTimeMs",
-			"rawOutput",
-			"passwordHash",
-		];
-		const documentedPropertyNames = Object.values(document.components.schemas)
-			.flatMap((schema) => Object.keys(schema.properties ?? {}));
+		expect(
+			JSON.stringify(
+				document.components.schemas.PatientConsultationListResponse,
+			),
+		).not.toContain('"ai_analysis"');
+		expect(
+			JSON.stringify(
+				document.components.schemas.PatientConsultationDetailResponse,
+			),
+		).not.toContain('"ai_analysis"');
+	});
 
-		for (const field of forbiddenPatientFields) {
-			expect(documentedPropertyNames).not.toContain(field);
-		}
+	test("documents only the safe temporary dummy result on consultation creation", () => {
+		const aiProperties =
+			document.components.schemas.TemporaryDummyAiAnalysis?.properties;
+
+		expect(aiProperties).toEqual(
+			expect.objectContaining({
+				summary: expect.any(Object),
+				detected_symptoms: expect.any(Object),
+				severity_level: expect.any(Object),
+				possible_category: expect.any(Object),
+				urgency_level: expect.any(Object),
+				confidence_score: expect.any(Object),
+				model_version: expect.any(Object),
+			}),
+		);
+		expect(aiProperties).not.toHaveProperty("rawOutput");
+		expect(aiProperties).not.toHaveProperty("processingTimeMs");
+		expect(aiProperties).not.toHaveProperty("raw_output");
+		expect(aiProperties).not.toHaveProperty("processing_time_ms");
 	});
 });

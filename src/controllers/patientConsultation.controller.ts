@@ -15,7 +15,7 @@ export const createPatientConsultation: RequestHandler = async (req, res) => {
 
 	res.status(201).json({
 		success: true,
-		message: "Konsultasi berhasil dibuat.",
+		message: "Konsultasi berhasil dianalisis.",
 		data,
 	});
 };

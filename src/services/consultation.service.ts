@@ -5,6 +5,10 @@ import {
 	type PatientConsultationListRecord,
 	type PatientDashboardStatisticsRecord,
 } from "../repositories/consultation.repository";
+import {
+	aiProcessingService,
+	type ConsultationProcessor,
+} from "./aiProcessing.service";
 import { ConsultationStatus } from "../generated/prisma/enums";
 import type {
 	ConsultationListQuery,
@@ -105,6 +109,7 @@ export class ConsultationService {
 	constructor(
 		private readonly repository: ConsultationRepository = consultationRepository,
 		private readonly now: () => Date = () => new Date(),
+		private readonly processor: ConsultationProcessor = aiProcessingService,
 	) {}
 
 	async createForPatient(
@@ -115,14 +120,16 @@ export class ConsultationService {
 			patientId,
 			input.complaint_text,
 		);
+		const aiAnalysis = await this.processor.processConsultation(consultation.id);
 
 		return {
 			consultation: {
 				id: consultation.id,
 				complaint_text: consultation.complaintText,
-				status: apiStatus(consultation.status),
+				status: apiStatus(ConsultationStatus.ANALYZED),
 				created_at: consultation.createdAt.toISOString(),
 			},
+			ai_analysis: aiAnalysis,
 		};
 	}
 

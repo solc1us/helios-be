@@ -15,6 +15,14 @@ export const commonSchemas = {
 			"failed",
 		],
 	},
+	SeverityLevel: {
+		type: "string",
+		enum: ["low", "medium", "high"],
+	},
+	UrgencyLevel: {
+		type: "string",
+		enum: ["normal", "priority", "urgent"],
+	},
 	ErrorDetail: {
 		type: "object",
 		required: ["field", "message"],
