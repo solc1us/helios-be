@@ -399,20 +399,46 @@ Do not implement consultation endpoints as part of Phase 3.
 
 ---
 
-### Phase 4 — Next
+### Phase 4 — Complete
 
-Patient Consultation API.
+Completed:
 
-Phase 4 should implement authenticated patient consultation creation and
-patient-owned consultation reads without expanding into AI processing or doctor
-review behavior.
+- authenticated patient consultation creation;
+- patient-owned consultation history;
+- status filtering and page/limit pagination;
+- newest-first consultation ordering;
+- generated complaint previews;
+- ownership-scoped consultation detail lookup;
+- enumeration-safe 404 behavior for missing and foreign consultations;
+- strict body, query, and UUID validation;
+- Patient-only route protection;
+- Phase 4 unit and route-protection tests.
+
+Implemented endpoints:
+
+```text
+POST /api/v1/patient/consultations
+GET  /api/v1/patient/consultations
+GET  /api/v1/patient/consultations/:id
+```
+
+Consultations remain in `SUBMITTED` after creation. Phase 4 does not create AI
+analysis records or transition consultations to `PROCESSING`.
+
+---
+
+### Phase 5 — Next
+
+AI Model Integration.
+
+Phase 5 should implement the internal AI adapter, validated structured output,
+processing status transitions, AI analysis persistence, and failure handling.
 
 ---
 
 ## 10. Remaining Roadmap
 
 ```text
-Phase 4  Patient Consultation
 Phase 5  AI Model Integration
 Phase 6  Doctor Consultation & Review
 Phase 7  Admin Management

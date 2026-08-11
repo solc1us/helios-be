@@ -871,7 +871,8 @@ GET /api/v1/patient/consultations/:id
 			"id": "consultation-uuid",
 			"complaint_text": "Saya demam, batuk, dan nyeri tenggorokan sejak 3 hari yang lalu.",
 			"status": "reviewed",
-			"created_at": "2026-08-11T10:00:00Z"
+			"created_at": "2026-08-11T10:00:00Z",
+			"updated_at": "2026-08-11T11:00:00Z"
 		},
 		"doctor_review": {
 			"review_note": "Keluhan telah ditinjau oleh dokter.",
@@ -884,15 +885,19 @@ GET /api/v1/patient/consultations/:id
 
 Hasil `ai_analysis` tidak dikirim kepada pasien karena AI digunakan sebagai decision-support/pre-screening untuk dokter.
 
-### Response — `403 Forbidden`
+Sebelum review dokter tersedia, `doctor_review` bernilai `null`.
+
+### Response — `404 Not Found`
 
 ```json
 {
 	"success": false,
-	"message": "Anda tidak memiliki akses ke konsultasi ini.",
+	"message": "Konsultasi tidak ditemukan.",
 	"errors": []
 }
 ```
+
+Response yang sama digunakan apabila konsultasi tidak ada atau dimiliki pasien lain agar keberadaan resource tidak dapat dienumerasi.
 
 ---
 

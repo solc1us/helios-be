@@ -3,9 +3,11 @@ import type { ZodType } from "zod";
 
 import { AppError } from "../utils/app-error";
 
-export function validateBody(schema: ZodType): RequestHandler {
-	return (req, _res, next) => {
-		const result = schema.safeParse(req.body);
+type ValidationSource = "body" | "query" | "params";
+
+function validate(schema: ZodType, source: ValidationSource): RequestHandler {
+	return (req, res, next) => {
+		const result = schema.safeParse(req[source]);
 
 		if (!result.success) {
 			const errors = result.error.issues.map((issue) => ({
@@ -17,7 +19,26 @@ export function validateBody(schema: ZodType): RequestHandler {
 			return;
 		}
 
-		req.body = result.data;
+		if (source === "body") {
+			req.body = result.data;
+		} else if (source === "query") {
+			res.locals.validatedQuery = result.data;
+		} else {
+			res.locals.validatedParams = result.data;
+		}
+
 		next();
 	};
+}
+
+export function validateBody(schema: ZodType): RequestHandler {
+	return validate(schema, "body");
+}
+
+export function validateQuery(schema: ZodType): RequestHandler {
+	return validate(schema, "query");
+}
+
+export function validateParams(schema: ZodType): RequestHandler {
+	return validate(schema, "params");
 }
