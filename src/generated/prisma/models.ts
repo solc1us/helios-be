@@ -8,4 +8,11 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Patient'
+export type * from './models/Doctor'
+export type * from './models/Admin'
+export type * from './models/Consultation'
+export type * from './models/AiAnalysis'
+export type * from './models/DoctorReview'
+export type * from './models/AuditLog'
 export type * from './commonInputTypes'

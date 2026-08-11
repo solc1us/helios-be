@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,187 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum AccountStatus {
+  ACTIVE   @map("active")
+  INACTIVE @map("inactive")
+
+  @@map("account_status")
+}
+
+enum ConsultationStatus {
+  SUBMITTED  @map("submitted")
+  PROCESSING @map("processing")
+  ANALYZED   @map("analyzed")
+  IN_REVIEW  @map("in_review")
+  REVIEWED   @map("reviewed")
+  CLOSED     @map("closed")
+  FAILED     @map("failed")
+
+  @@map("consultation_status")
+}
+
+enum SeverityLevel {
+  LOW    @map("low")
+  MEDIUM @map("medium")
+  HIGH   @map("high")
+
+  @@map("severity_level")
+}
+
+enum UrgencyLevel {
+  NORMAL   @map("normal")
+  PRIORITY @map("priority")
+  URGENT   @map("urgent")
+
+  @@map("urgency_level")
+}
+
+enum ActorType {
+  PATIENT @map("patient")
+  DOCTOR  @map("doctor")
+  ADMIN   @map("admin")
+  SYSTEM  @map("system")
+
+  @@map("actor_type")
+}
+
+model Patient {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  email        String        @unique
+  phone        String        @unique
+  passwordHash String        @map("password_hash")
+  gender       String?
+  birthDate    DateTime?     @db.Date @map("birth_date")
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  consultations Consultation[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("patients")
+}
+
+model Doctor {
+  id             String        @id @default(uuid()) @db.Uuid
+  name           String
+  email          String        @unique
+  passwordHash   String        @map("password_hash")
+  specialization String?
+  licenseNumber  String        @unique @map("license_number")
+  status         AccountStatus @default(ACTIVE)
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  consultations Consultation[]
+  reviews       DoctorReview[]
+
+  @@index([status])
+  @@index([specialization])
+  @@index([createdAt])
+  @@map("doctors")
+}
+
+model Admin {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  status       AccountStatus @default(ACTIVE)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model Consultation {
+  id            String             @id @default(uuid()) @db.Uuid
+  patientId     String             @db.Uuid @map("patient_id")
+  doctorId      String?            @db.Uuid @map("doctor_id")
+  complaintText String             @db.Text @map("complaint_text")
+  status        ConsultationStatus @default(SUBMITTED)
+  assignedAt    DateTime?          @map("assigned_at")
+  reviewedAt    DateTime?          @map("reviewed_at")
+  closedAt      DateTime?          @map("closed_at")
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  patient    Patient       @relation(fields: [patientId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  doctor     Doctor?       @relation(fields: [doctorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  aiAnalysis AiAnalysis?
+  review     DoctorReview?
+  auditLogs  AuditLog[]
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([status, doctorId])
+  @@map("consultations")
+}
+
+model AiAnalysis {
+  id                   String        @id @default(uuid()) @db.Uuid
+  consultationId       String        @unique @db.Uuid @map("consultation_id")
+  summary              String        @db.Text
+  detectedSymptoms     Json          @db.JsonB @map("detected_symptoms")
+  duration             String?
+  severityLevel        SeverityLevel @map("severity_level")
+  possibleCategory     String        @map("possible_category")
+  urgencyLevel         UrgencyLevel  @map("urgency_level")
+  doctorNoteSuggestion String?       @db.Text @map("doctor_note_suggestion")
+  confidenceScore      Decimal       @db.Decimal(5, 4) @map("confidence_score")
+  modelVersion         String        @map("model_version")
+  processingTimeMs     Int?          @map("processing_time_ms")
+  rawOutput            Json?         @db.JsonB @map("raw_output")
+  createdAt            DateTime      @default(now()) @map("created_at")
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("ai_analyses")
+}
+
+model DoctorReview {
+  id                String        @id @default(uuid()) @db.Uuid
+  consultationId    String        @unique @db.Uuid @map("consultation_id")
+  doctorId          String        @db.Uuid @map("doctor_id")
+  reviewNote        String        @db.Text @map("review_note")
+  finalCategory     String?       @map("final_category")
+  finalUrgencyLevel UrgencyLevel? @map("final_urgency_level")
+  recommendation    String?       @db.Text
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  doctor       Doctor       @relation(fields: [doctorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([doctorId])
+  @@index([createdAt])
+  @@map("doctor_reviews")
+}
+
+model AuditLog {
+  id             String     @id @default(uuid()) @db.Uuid
+  actorType      ActorType  @map("actor_type")
+  actorId        String?    @db.Uuid @map("actor_id")
+  consultationId String?    @db.Uuid @map("consultation_id")
+  action         String
+  description    String?    @db.Text
+  ipAddress      String?    @map("ip_address")
+  userAgent      String?    @db.Text @map("user_agent")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  consultation Consultation? @relation(fields: [consultationId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([actorType])
+  @@index([actorId])
+  @@index([consultationId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([actorType, actorId])
+  @@map("audit_logs")
 }

@@ -9,7 +9,50 @@
 * 🟢 You can import this file directly.
 */
 
+export const AccountStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const ConsultationStatus = {
+  SUBMITTED: 'SUBMITTED',
+  PROCESSING: 'PROCESSING',
+  ANALYZED: 'ANALYZED',
+  IN_REVIEW: 'IN_REVIEW',
+  REVIEWED: 'REVIEWED',
+  CLOSED: 'CLOSED',
+  FAILED: 'FAILED'
+} as const
+
+export type ConsultationStatus = (typeof ConsultationStatus)[keyof typeof ConsultationStatus]
+
+
+export const SeverityLevel = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH'
+} as const
+
+export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel]
+
+
+export const UrgencyLevel = {
+  NORMAL: 'NORMAL',
+  PRIORITY: 'PRIORITY',
+  URGENT: 'URGENT'
+} as const
+
+export type UrgencyLevel = (typeof UrgencyLevel)[keyof typeof UrgencyLevel]
+
+
+export const ActorType = {
+  PATIENT: 'PATIENT',
+  DOCTOR: 'DOCTOR',
+  ADMIN: 'ADMIN',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type ActorType = (typeof ActorType)[keyof typeof ActorType]

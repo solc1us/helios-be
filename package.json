@@ -11,11 +11,13 @@
 		"prisma:generate": "bunx --bun prisma generate",
 		"prisma:validate": "bunx --bun prisma validate",
 		"prisma:migrate": "bunx --bun prisma migrate dev",
+		"prisma:seed": "bun prisma/seed.ts",
 		"prisma:studio": "bunx --bun prisma studio"
 	},
 	"dependencies": {
 		"@prisma/adapter-pg": "^7.9.1",
 		"@prisma/client": "^7.9.1",
+		"bcryptjs": "^3.0.3",
 		"cors": "^2.8.6",
 		"dotenv": "^17.4.2",
 		"express": "^5.2.1",
