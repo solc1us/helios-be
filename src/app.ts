@@ -1,35 +1,47 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
 
+import { env } from "./config/env.config";
+import { errorHandler } from "./middlewares/error.middleware";
+import routes from "./routes";
+import { logger } from "./utils/logger";
+
 const app = express();
+
+app.disable("x-powered-by");
 
 app.use(helmet());
 
 app.use(
 	cors({
-		origin: process.env.CORS_ORIGIN,
-		credentials: true,
+		origin: env.CORS_ORIGIN,
 	}),
 );
 
-app.use(express.json());
+app.use(
+	express.json({
+		limit: "100kb",
+	}),
+);
 
 app.use(
 	pinoHttp({
-		autoLogging: true,
+		logger,
 	}),
 );
 
-app.get("/api/v1/health", (_req, res) => {
-	res.status(200).json({
-		success: true,
-		message: "Service healthy.",
-		data: {
-			status: "healthy",
-		},
+app.use("/api/v1", routes);
+
+app.use((_req, res) => {
+	res.status(404).json({
+		success: false,
+		message: "Endpoint tidak ditemukan.",
+		errors: [],
 	});
 });
+
+app.use(errorHandler);
 
 export default app;
