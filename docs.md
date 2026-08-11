@@ -835,20 +835,37 @@ GET /api/v1/patient/consultations
 		"items": [
 			{
 				"id": "consultation-uuid",
-				"complaint_preview": "Saya demam, batuk, dan nyeri tenggorokan...",
+				"complaint_text": "Saya demam, batuk, dan nyeri tenggorokan...",
 				"status": "reviewed",
-				"created_at": "2026-08-11T10:00:00Z"
+				"created_at": "2026-08-11T10:00:00Z",
+				"category": "keluhan pernapasan",
+				"confidence_score": 0.82
 			}
 		],
 		"pagination": {
 			"page": 1,
 			"limit": 10,
-			"total": 1,
-			"total_pages": 1
+			"total": 12,
+			"total_pages": 2
+		},
+		"statistics": {
+			"this_month": 4,
+			"best_confidence": 0.87,
+			"top_diagnosis": "keluhan pernapasan",
+			"distribution": {
+				"keluhan pernapasan": 3,
+				"keluhan pencernaan": 1
+			}
 		}
 	}
 }
 ```
+
+`complaint_text` pada daftar merupakan representasi ringan: teks penuh sampai 100 karakter, atau 100 karakter pertama ditambah `...`.
+
+`category` berasal hanya dari `DoctorReview.finalCategory`, sedangkan `confidence_score` berasal dari `AiAnalysis.confidenceScore`. Keduanya hanya ditampilkan untuk status `reviewed` atau `closed`; prediksi kategori AI yang belum dikonfirmasi tidak dikirim kepada pasien. Endpoint ini tidak mengirim object `AiAnalysis` atau field AI sensitif lainnya.
+
+Statistik selalu dihitung untuk seluruh riwayat pasien terautentikasi dan tidak dipengaruhi pagination maupun filter status tabel. `this_month` menghitung konsultasi pada bulan kalender UTC saat ini. `best_confidence` menggunakan confidence tertinggi dari konsultasi `reviewed`/`closed`. `top_diagnosis` dan `distribution` menggunakan kategori final dokter; apabila jumlah teratas sama, kategori dengan urutan alfabetis lebih dahulu dipilih.
 
 ---
 

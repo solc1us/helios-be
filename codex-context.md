@@ -425,6 +425,13 @@ GET  /api/v1/patient/consultations/:id
 Consultations remain in `SUBMITTED` after creation. Phase 4 does not create AI
 analysis records or transition consultations to `PROCESSING`.
 
+Phase 4.1 added patient dashboard data to the existing consultation history
+endpoint: lightweight `complaint_text`, doctor-confirmed category, reviewed-only
+confidence, UTC current-month count, best reviewed confidence, deterministic top
+diagnosis, and final-category distribution. Dashboard statistics remain
+patient-scoped and independent from table pagination and status filtering. Raw
+AI analysis and unreviewed AI categories remain private.
+
 ---
 
 ### Phase 5 — Next

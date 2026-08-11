@@ -11,6 +11,25 @@ export interface ConsultationRecord {
 	updatedAt: Date;
 }
 
+export interface DecimalValue {
+	toNumber(): number;
+}
+
+export interface PatientConsultationListRecord {
+	id: string;
+	complaintText: string;
+	status: ConsultationStatus;
+	createdAt: Date;
+	review: { finalCategory: string | null } | null;
+	aiAnalysis: { confidenceScore: DecimalValue } | null;
+}
+
+export interface PatientDashboardStatisticsRecord {
+	status: ConsultationStatus;
+	review: { finalCategory: string | null } | null;
+	aiAnalysis: { confidenceScore: DecimalValue } | null;
+}
+
 export interface FindManyByPatientOptions {
 	patientId: string;
 	status?: ConsultationStatus;
@@ -31,6 +50,24 @@ const consultationSelect = {
 	createdAt: true,
 	updatedAt: true,
 } as const;
+
+const patientListSelect = {
+	id: true,
+	complaintText: true,
+	status: true,
+	createdAt: true,
+	review: {
+		select: { finalCategory: true },
+	},
+	aiAnalysis: {
+		select: { confidenceScore: true },
+	},
+} as const;
+
+const reviewedStatuses = [
+	ConsultationStatus.REVIEWED,
+	ConsultationStatus.CLOSED,
+];
 
 function patientFilter(options: CountByPatientOptions) {
 	return {
@@ -57,18 +94,51 @@ export const consultationRepository = {
 
 	findManyByPatient(
 		options: FindManyByPatientOptions,
-	): Promise<ConsultationRecord[]> {
+	): Promise<PatientConsultationListRecord[]> {
 		return prisma.consultation.findMany({
 			where: patientFilter(options),
 			orderBy: { createdAt: "desc" },
 			skip: options.skip,
 			take: options.take,
-			select: consultationSelect,
+			select: patientListSelect,
 		});
 	},
 
 	countByPatient(options: CountByPatientOptions): Promise<number> {
 		return prisma.consultation.count({ where: patientFilter(options) });
+	},
+
+	countCurrentMonthByPatient(
+		patientId: string,
+		monthStart: Date,
+		nextMonthStart: Date,
+	): Promise<number> {
+		return prisma.consultation.count({
+			where: {
+				patientId,
+				createdAt: { gte: monthStart, lt: nextMonthStart },
+			},
+		});
+	},
+
+	findDashboardStatisticsByPatient(
+		patientId: string,
+	): Promise<PatientDashboardStatisticsRecord[]> {
+		return prisma.consultation.findMany({
+			where: {
+				patientId,
+				status: { in: reviewedStatuses },
+			},
+			select: {
+				status: true,
+				review: {
+					select: { finalCategory: true },
+				},
+				aiAnalysis: {
+					select: { confidenceScore: true },
+				},
+			},
+		});
 	},
 
 	findByIdAndPatient(
