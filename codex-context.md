@@ -432,6 +432,14 @@ diagnosis, and final-category distribution. Dashboard statistics remain
 patient-scoped and independent from table pagination and status filtering. Raw
 AI analysis and unreviewed AI categories remain private.
 
+### Phase 4.2 — Complete
+
+Phase 4.2 added a modular OpenAPI 3.0.3 definition for every implemented
+endpoint, Swagger UI at `/api-docs`, the raw shared specification at
+`/openapi.json`, JWT `BearerAuth`, and automated OpenAPI validation and route
+coverage tests. Documentation routes are enabled in development/test and
+disabled by default in production.
+
 ---
 
 ### Phase 5 — Next

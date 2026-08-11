@@ -523,10 +523,26 @@ Example:
 	"success": true,
 	"message": "Service healthy.",
 	"data": {
-		"status": "healthy"
+		"status": "healthy",
+		"database": "connected"
 	}
 }
 ```
+
+---
+
+## 3.10 API Documentation
+
+Interactive API documentation is available in development and test environments:
+
+```text
+Swagger UI : /api-docs
+OpenAPI    : /openapi.json
+```
+
+Swagger UI supports JWT Bearer authorization for protected operations. The
+TypeScript OpenAPI modules are the detailed machine-readable reference; these
+routes are disabled by default when `NODE_ENV=production`.
 
 ---
 
@@ -805,7 +821,8 @@ Authorization: Bearer <patient_token>
 }
 ```
 
-AI processing dilakukan setelah consultation berhasil disimpan.
+Pada implementasi Phase 4 saat ini, consultation tetap berstatus `submitted`.
+Endpoint ini tidak memulai AI processing secara otomatis.
 
 ---
 
@@ -891,18 +908,15 @@ GET /api/v1/patient/consultations/:id
 			"created_at": "2026-08-11T10:00:00Z",
 			"updated_at": "2026-08-11T11:00:00Z"
 		},
-		"doctor_review": {
-			"review_note": "Keluhan telah ditinjau oleh dokter.",
-			"recommendation": "Lakukan pemeriksaan langsung apabila kondisi memburuk.",
-			"reviewed_at": "2026-08-11T11:00:00Z"
-		}
+		"doctor_review": null
 	}
 }
 ```
 
 Hasil `ai_analysis` tidak dikirim kepada pasien karena AI digunakan sebagai decision-support/pre-screening untuk dokter.
 
-Sebelum review dokter tersedia, `doctor_review` bernilai `null`.
+Pada kontrak Patient Consultation yang saat ini diimplementasikan,
+`doctor_review` bernilai `null`.
 
 ### Response — `404 Not Found`
 

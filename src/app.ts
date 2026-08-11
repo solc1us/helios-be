@@ -4,6 +4,7 @@ import helmet from "helmet";
 import pinoHttp from "pino-http";
 
 import { env } from "./config/env.config";
+import { setupSwagger } from "./config/swagger.config";
 import { errorHandler } from "./middlewares/error.middleware";
 import routes from "./routes";
 import { logger } from "./utils/logger";
@@ -31,6 +32,8 @@ app.use(
 		logger,
 	}),
 );
+
+setupSwagger(app);
 
 app.use("/api/v1", routes);
 
