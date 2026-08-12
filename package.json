@@ -12,7 +12,11 @@
 		"prisma:validate": "bunx --bun prisma validate",
 		"prisma:migrate": "bunx --bun prisma migrate dev",
 		"prisma:seed": "bun prisma/seed.ts",
-		"prisma:studio": "bunx --bun prisma studio"
+		"prisma:studio": "bunx --bun prisma studio",
+		"db:up": "docker compose --env-file .env.docker up -d postgres",
+		"db:down": "docker compose --env-file .env.docker down",
+		"db:logs": "docker compose --env-file .env.docker logs -f postgres",
+		"db:status": "docker compose --env-file .env.docker ps"
 	},
 	"dependencies": {
 		"@prisma/adapter-pg": "^7.9.1",

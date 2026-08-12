@@ -297,6 +297,10 @@ DEV_ADMIN_PASSWORD
 
 The seed is idempotent.
 
+Dockerized PostgreSQL development is available through `compose.yaml` using
+PostgreSQL 18, a named persistent volume, a configurable host port, and the
+existing migration workflow through `prisma migrate deploy`.
+
 ---
 
 ## 9. Development Progress
