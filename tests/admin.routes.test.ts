@@ -27,7 +27,10 @@ afterAll(async () => {
 });
 
 async function requestWithRole(role: (typeof ROLES)[keyof typeof ROLES]) {
-	const token = await generateAccessToken({ id: `${role}-id`, role });
+	const token = await generateAccessToken({
+		id: "03c72b24-5393-4871-adf5-786df09e4d3f",
+		role,
+	});
 	return fetch(`${baseUrl}/api/v1/admin/doctors/not-a-uuid`, {
 		headers: { Authorization: `Bearer ${token.accessToken}` },
 	});
@@ -42,7 +45,7 @@ describe("Admin route protection", () => {
 		expect((await requestWithRole(role)).status).toBe(403);
 	});
 
-	test("accepts an Admin token and reaches request validation", async () => {
-		expect((await requestWithRole(ROLES.ADMIN)).status).toBe(422);
+	test("rejects an Admin token whose current account no longer exists", async () => {
+		expect((await requestWithRole(ROLES.ADMIN)).status).toBe(401);
 	});
 });

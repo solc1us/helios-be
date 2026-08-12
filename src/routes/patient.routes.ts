@@ -6,6 +6,8 @@ import {
 	listPatientConsultations,
 } from "../controllers/patientConsultation.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { activeAccountMiddleware } from "../middlewares/activeAccount.middleware";
+import { aiWriteRateLimiter } from "../middlewares/rateLimit.middleware";
 import { patientOnly } from "../middlewares/patientOnly.middleware";
 import {
 	validateBody,
@@ -20,10 +22,11 @@ import {
 
 const router = Router();
 
-router.use(authMiddleware, patientOnly);
+router.use(authMiddleware, patientOnly, activeAccountMiddleware);
 
 router.post(
 	"/consultations",
+	aiWriteRateLimiter,
 	validateBody(createConsultationSchema),
 	createPatientConsultation,
 );

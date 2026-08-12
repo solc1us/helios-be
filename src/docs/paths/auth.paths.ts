@@ -49,6 +49,8 @@ function errorResponse(description: string) {
 	};
 }
 
+const rateLimitResponse = errorResponse("Too many authentication attempts.");
+
 export const authPaths = {
 	"/api/v1/auth/patient/register": {
 		post: {
@@ -62,6 +64,7 @@ export const authPaths = {
 					"PatientRegisterResponse",
 				),
 				"409": errorResponse("Email address or phone number already exists."),
+				"429": rateLimitResponse,
 				"422": validationResponse,
 				"500": serverErrorResponse,
 			},
@@ -78,6 +81,7 @@ export const authPaths = {
 				"200": successResponse("Login successful.", "PatientLoginResponse"),
 				"401": errorResponse("Invalid credentials."),
 				"403": errorResponse("Account is inactive."),
+				"429": rateLimitResponse,
 				"422": validationResponse,
 				"500": serverErrorResponse,
 			},
@@ -93,6 +97,7 @@ export const authPaths = {
 				"200": successResponse("Login successful.", "DoctorLoginResponse"),
 				"401": errorResponse("Invalid credentials."),
 				"403": errorResponse("Account is inactive."),
+				"429": rateLimitResponse,
 				"422": validationResponse,
 				"500": serverErrorResponse,
 			},
@@ -108,6 +113,7 @@ export const authPaths = {
 				"200": successResponse("Login successful.", "AdminLoginResponse"),
 				"401": errorResponse("Invalid credentials."),
 				"403": errorResponse("Account is inactive."),
+				"429": rateLimitResponse,
 				"422": validationResponse,
 				"500": serverErrorResponse,
 			},

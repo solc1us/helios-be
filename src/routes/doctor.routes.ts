@@ -8,6 +8,7 @@ import {
 	reviewDoctorConsultation,
 } from "../controllers/doctorConsultation.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { activeAccountMiddleware } from "../middlewares/activeAccount.middleware";
 import { doctorOnly } from "../middlewares/doctorOnly.middleware";
 import {
 	validateBody,
@@ -23,7 +24,7 @@ import {
 
 const router = Router();
 
-router.use(authMiddleware, doctorOnly);
+router.use(authMiddleware, doctorOnly, activeAccountMiddleware);
 
 router.get(
 	"/consultations",

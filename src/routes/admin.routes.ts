@@ -15,6 +15,7 @@ import {
 } from "../controllers/admin.controller";
 import { adminOnly } from "../middlewares/adminOnly.middleware";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { activeAccountMiddleware } from "../middlewares/activeAccount.middleware";
 import { validateBody, validateParams, validateQuery } from "../middlewares/validation.middleware";
 import {
 	adminAccountListQuerySchema,
@@ -28,7 +29,7 @@ import {
 
 const router = Router();
 
-router.use(authMiddleware, adminOnly);
+router.use(authMiddleware, adminOnly, activeAccountMiddleware);
 
 router.get("/doctors", validateQuery(adminAccountListQuerySchema), listAdminDoctors);
 router.post("/doctors", validateBody(createDoctorSchema), createAdminDoctor);

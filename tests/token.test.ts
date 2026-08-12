@@ -23,6 +23,15 @@ describe("JWT utility", () => {
 		expect(verifyAccessToken("invalid-token")).rejects.toBeDefined();
 	});
 
+	test("rejects a signed token whose subject is not an actor UUID", async () => {
+		const generated = await generateAccessToken({
+			id: "not-a-uuid",
+			role: ROLES.PATIENT,
+		});
+
+		expect(verifyAccessToken(generated.accessToken)).rejects.toBeDefined();
+	});
+
 	test("rejects an expired token", async () => {
 		const generated = await generateAccessToken(
 			{

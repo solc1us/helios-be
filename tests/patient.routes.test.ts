@@ -35,7 +35,10 @@ afterAll(async () => {
 });
 
 async function postWithRole(role: (typeof ROLES)[keyof typeof ROLES]) {
-	const token = await generateAccessToken({ id: `${role}-id`, role });
+	const token = await generateAccessToken({
+		id: "03c72b24-5393-4871-adf5-786df09e4d3f",
+		role,
+	});
 
 	return fetch(`${baseUrl}/api/v1/patient/consultations`, {
 		method: "POST",
@@ -67,13 +70,13 @@ describe("patient consultation route protection", () => {
 		},
 	);
 
-	test("accepts a patient token and reaches request validation", async () => {
+	test("rejects a Patient token whose current account no longer exists", async () => {
 		const response = await postWithRole(ROLES.PATIENT);
 		const body = (await response.json()) as {
 			message: string;
 		};
 
-		expect(response.status).toBe(422);
-		expect(body.message).toBe("Validasi gagal.");
+		expect(response.status).toBe(401);
+		expect(body.message).toBe("Token autentikasi tidak valid.");
 	});
 });

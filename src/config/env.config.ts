@@ -16,6 +16,22 @@ const envSchema = z.object({
 	CORS_ORIGIN: z.string().url(),
 
 	LOG_LEVEL: z.string().default("info"),
+
+	AUTH_RATE_LIMIT_WINDOW_MS: z.coerce
+		.number()
+		.int()
+		.positive()
+		.default(15 * 60 * 1000),
+
+	AUTH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(30),
+
+	AI_WRITE_RATE_LIMIT_WINDOW_MS: z.coerce
+		.number()
+		.int()
+		.positive()
+		.default(60 * 1000),
+
+	AI_WRITE_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
 });
 
 const parsed = envSchema.safeParse(process.env);

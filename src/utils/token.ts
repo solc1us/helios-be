@@ -12,6 +12,9 @@ const durationMultipliers = {
 	w: 7 * 24 * 60 * 60,
 } as const;
 
+const uuidPattern =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export interface SignAccessTokenOptions {
 	expiresIn?: string;
 	issuedAt?: number;
@@ -72,7 +75,7 @@ export async function verifyAccessToken(token: string): Promise<AuthContext> {
 
 	if (
 		typeof payload.sub !== "string" ||
-		payload.sub.length === 0 ||
+		!uuidPattern.test(payload.sub) ||
 		!isAuthRole(payload.role)
 	) {
 		throw new Error("Invalid access token payload.");

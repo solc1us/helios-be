@@ -7,7 +7,8 @@ import { env } from "./config/env.config";
 import { setupSwagger } from "./config/swagger.config";
 import { errorHandler } from "./middlewares/error.middleware";
 import routes from "./routes";
-import { logger } from "./utils/logger";
+import { logger, requestLoggerOptions } from "./utils/logger";
+import { AppError } from "./utils/app-error";
 
 const app = express();
 
@@ -17,7 +18,14 @@ app.use(helmet());
 
 app.use(
 	cors({
-		origin: env.CORS_ORIGIN,
+		origin(origin, callback) {
+			if (!origin || origin === env.CORS_ORIGIN) {
+				callback(null, true);
+				return;
+			}
+
+			callback(new AppError(403, "Origin tidak diizinkan."));
+		},
 	}),
 );
 
@@ -28,9 +36,7 @@ app.use(
 );
 
 app.use(
-	pinoHttp({
-		logger,
-	}),
+	pinoHttp({ logger, ...requestLoggerOptions }),
 );
 
 setupSwagger(app);

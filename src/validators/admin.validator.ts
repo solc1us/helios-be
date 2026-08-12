@@ -69,8 +69,8 @@ export const adminIdParamsSchema: z.ZodType<AdminIdParams> = z
 export const createDoctorSchema: z.ZodType<CreateDoctorInput> = z
 	.object({
 		name: z.string().trim().min(1, "Nama wajib diisi.").max(255),
-		email: z.string().trim().email("Email tidak valid.").toLowerCase(),
-		password: z.string().min(8, "Password minimal 8 karakter."),
+		email: z.string().trim().max(254, "Email maksimal 254 karakter.").email("Email tidak valid.").toLowerCase(),
+		password: z.string().min(8, "Password minimal 8 karakter.").max(128, "Password maksimal 128 karakter."),
 		specialization: nullableSpecialization,
 		license_number: z
 			.string()
@@ -83,7 +83,7 @@ export const createDoctorSchema: z.ZodType<CreateDoctorInput> = z
 export const updateDoctorSchema: z.ZodType<UpdateDoctorInput> = z
 	.object({
 		name: z.string().trim().min(1, "Nama tidak boleh kosong.").max(255).optional(),
-		email: z.string().trim().email("Email tidak valid.").toLowerCase().optional(),
+		email: z.string().trim().max(254, "Email maksimal 254 karakter.").email("Email tidak valid.").toLowerCase().optional(),
 		specialization: nullableSpecialization,
 		license_number: z.string().trim().min(1, "Nomor lisensi tidak boleh kosong.").max(255).optional(),
 	})

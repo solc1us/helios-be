@@ -5,6 +5,7 @@ import { openApiDocument } from "../src/docs/openapi";
 
 interface Operation {
 	security?: Array<Record<string, string[]>>;
+	responses?: Record<string, unknown>;
 }
 
 interface OpenApiForTests {
@@ -185,5 +186,17 @@ describe("OpenAPI document", () => {
 		expect(schemas).not.toContain("raw_output");
 		expect(schemas).not.toContain("processingTimeMs");
 		expect(schemas).not.toContain("processing_time_ms");
+	});
+
+	test("documents 429 responses on rate-limited auth and AI-write endpoints", () => {
+		for (const [path, method] of [
+			["/api/v1/auth/patient/register", "post"],
+			["/api/v1/auth/patient/login", "post"],
+			["/api/v1/auth/doctor/login", "post"],
+			["/api/v1/auth/admin/login", "post"],
+			["/api/v1/patient/consultations", "post"],
+		] as const) {
+			expect(document.paths[path]?.[method]?.responses).toHaveProperty("429");
+		}
 	});
 });

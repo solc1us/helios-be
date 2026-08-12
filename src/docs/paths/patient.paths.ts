@@ -51,6 +51,7 @@ export const patientPaths = {
 					"ConsultationCreatedResponse",
 				),
 				...protectedErrors,
+				"429": errorResponse("Too many AI-triggering consultation requests."),
 				"422": validationResponse,
 			},
 		},

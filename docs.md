@@ -1577,6 +1577,23 @@ Minimum security requirement untuk MVP:
 - Secret dan credential tidak disimpan di repository.
 - CORS dibatasi sesuai frontend origin pada environment production.
 
+Phase 8 menambahkan hardening application-level berikut:
+
+- endpoint registrasi/login dibatasi per IP menggunakan auth rate limiter;
+- pembuatan konsultasi memiliki limiter terpisah karena memicu AI processing;
+- respons limiter menggunakan HTTP `429` dan format error API standar;
+- JWT tetap stateless, tetapi setiap route Patient/Doctor/Admin memeriksa status
+  akun terkini; akun hilang ditolak `401` dan akun inactive ditolak `403`;
+- CORS hanya menerima `CORS_ORIGIN` (request non-browser tanpa Origin tetap
+  didukung);
+- Helmet tetap aktif secara global, dengan CSP Swagger yang dibatasi hanya pada
+  `/api-docs` di development/test;
+- JSON request dibatasi `100kb`; payload berlebih mendapat `413` yang aman;
+- Pino hanya menulis metadata request dan meredaksi Authorization, password,
+  token, secret, serta teks kesehatan umum;
+- error tak terduga selalu menghasilkan respons `500` generik tanpa stack,
+  detail Prisma/PostgreSQL, path filesystem, atau error library.
+
 ---
 
 # 12. Environment Variables
@@ -1595,6 +1612,11 @@ JWT_EXPIRES_IN=24h
 CORS_ORIGIN=http://localhost:3000
 
 LOG_LEVEL=info
+
+AUTH_RATE_LIMIT_WINDOW_MS=900000
+AUTH_RATE_LIMIT_MAX=30
+AI_WRITE_RATE_LIMIT_WINDOW_MS=60000
+AI_WRITE_RATE_LIMIT_MAX=10
 
 AI_MODEL_MODE=
 AI_MODEL_TARGET=

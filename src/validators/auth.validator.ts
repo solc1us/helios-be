@@ -24,15 +24,16 @@ function isNotFutureDate(value: string): boolean {
 
 export const patientRegistrationSchema: z.ZodType<PatientRegistrationInput> = z
 	.object({
-		name: z.string().trim().min(1, "Nama wajib diisi."),
+		name: z.string().trim().min(1, "Nama wajib diisi.").max(255, "Nama maksimal 255 karakter."),
 		email: z
 			.string()
 			.trim()
+			.max(254, "Email maksimal 254 karakter.")
 			.email("Email tidak valid.")
 			.transform((value) => value.toLowerCase()),
-		phone: z.string().trim().min(1, "Nomor telepon wajib diisi."),
-		password: z.string().min(8, "Password minimal 8 karakter."),
-		gender: z.string().trim().optional(),
+		phone: z.string().trim().min(1, "Nomor telepon wajib diisi.").max(32, "Nomor telepon maksimal 32 karakter."),
+		password: z.string().min(8, "Password minimal 8 karakter.").max(128, "Password maksimal 128 karakter."),
+		gender: z.string().trim().min(1, "Gender tidak boleh kosong.").max(50, "Gender maksimal 50 karakter.").optional(),
 		birth_date: z
 			.string()
 			.refine(isValidBirthDate, "Tanggal lahir tidak valid.")
@@ -47,10 +48,11 @@ export const patientLoginSchema: z.ZodType<PatientLoginInput> = z
 			.string()
 			.trim()
 			.min(1, "Email atau nomor telepon wajib diisi.")
+			.max(254, "Email atau nomor telepon maksimal 254 karakter.")
 			.transform((value) =>
 				value.includes("@") ? value.toLowerCase() : value,
 			),
-		password: z.string().min(1, "Password wajib diisi."),
+		password: z.string().min(1, "Password wajib diisi.").max(128, "Password maksimal 128 karakter."),
 	})
 	.strict();
 
@@ -59,8 +61,9 @@ export const emailLoginSchema: z.ZodType<EmailLoginInput> = z
 		email: z
 			.string()
 			.trim()
+			.max(254, "Email maksimal 254 karakter.")
 			.email("Email tidak valid.")
 			.transform((value) => value.toLowerCase()),
-		password: z.string().min(1, "Password wajib diisi."),
+		password: z.string().min(1, "Password wajib diisi.").max(128, "Password maksimal 128 karakter."),
 	})
 	.strict();

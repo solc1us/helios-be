@@ -474,16 +474,23 @@ bcrypt password utility; account status changes preserve historical relations.
 Admin Doctor/account changes and Consultation detail views create safe audit
 events without health free text.
 
-### Phase 8 — Next
+### Phase 8 — Security & Validation Hardening: Complete
 
-Security & Validation Hardening.
+Authentication and AI-triggering writes now have configurable in-memory rate
+limits. Protected actor routes verify current account existence/status, CORS is
+strictly allowlisted, JSON payloads remain bounded, logging redacts credentials
+and health free text, and malformed/oversized/unexpected errors are sanitized.
+Helmet and production-disabled Swagger behavior have dedicated regression tests.
+
+### Phase 9 — Next
+
+Testing & API Documentation.
 
 ---
 
 ## 10. Remaining Roadmap
 
 ```text
-Phase 8  Security & Validation Hardening
 Phase 9  Testing & API Documentation
 Phase 10 Deployment Preparation
 ```

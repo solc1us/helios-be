@@ -32,7 +32,10 @@ afterAll(async () => {
 });
 
 async function requestWithRole(role: (typeof ROLES)[keyof typeof ROLES]) {
-	const token = await generateAccessToken({ id: `${role}-id`, role });
+	const token = await generateAccessToken({
+		id: "03c72b24-5393-4871-adf5-786df09e4d3f",
+		role,
+	});
 
 	return fetch(
 		`${baseUrl}/api/v1/doctor/consultations/not-a-uuid/review`,
@@ -57,8 +60,8 @@ describe("Doctor consultation route protection", () => {
 		expect((await requestWithRole(role)).status).toBe(403);
 	});
 
-	test("accepts a Doctor token and reaches UUID validation", async () => {
+	test("rejects a Doctor token whose current account no longer exists", async () => {
 		const response = await requestWithRole(ROLES.DOCTOR);
-		expect(response.status).toBe(422);
+		expect(response.status).toBe(401);
 	});
 });
