@@ -465,16 +465,24 @@ confidence. Doctor view, claim, review, and status changes are audited.
 
 ---
 
-### Phase 7 — Next
+### Phase 7 — Admin Management: Complete
 
-Admin Management.
+Admin now has protected Doctor account list/create/detail/profile/status
+management, Patient list/detail/status monitoring, read-only Consultation
+monitoring, and paginated AuditLog access. Doctor creation uses the existing
+bcrypt password utility; account status changes preserve historical relations.
+Admin Doctor/account changes and Consultation detail views create safe audit
+events without health free text.
+
+### Phase 8 — Next
+
+Security & Validation Hardening.
 
 ---
 
 ## 10. Remaining Roadmap
 
 ```text
-Phase 7  Admin Management
 Phase 8  Security & Validation Hardening
 Phase 9  Testing & API Documentation
 Phase 10 Deployment Preparation

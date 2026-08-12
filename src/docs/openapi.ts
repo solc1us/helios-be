@@ -1,10 +1,12 @@
 import type { JsonObject } from "swagger-ui-express";
 
+import { adminPaths } from "./paths/admin.paths";
 import { authPaths } from "./paths/auth.paths";
 import { healthPaths } from "./paths/health.paths";
 import { doctorPaths } from "./paths/doctor.paths";
 import { patientPaths } from "./paths/patient.paths";
 import { authSchemas } from "./schemas/auth.schema";
+import { adminSchemas } from "./schemas/admin.schema";
 import { commonSchemas } from "./schemas/common.schema";
 import { consultationSchemas } from "./schemas/consultation.schema";
 import { doctorConsultationSchemas } from "./schemas/doctorConsultation.schema";
@@ -37,12 +39,17 @@ export const openApiDocument: JsonObject = {
 			name: "Doctor",
 			description: "Doctor consultation queue, claim, review, and close operations.",
 		},
+		{
+			name: "Admin",
+			description: "Administrative account management, consultation monitoring, and audit access.",
+		},
 	],
 	paths: {
 		...healthPaths,
 		...authPaths,
 		...patientPaths,
 		...doctorPaths,
+		...adminPaths,
 	},
 	components: {
 		securitySchemes: {
@@ -53,11 +60,12 @@ export const openApiDocument: JsonObject = {
 				description: "JWT access token returned by a login endpoint.",
 			},
 		},
-		schemas: {
+			schemas: {
 			...commonSchemas,
 			...authSchemas,
 			...consultationSchemas,
 			...doctorConsultationSchemas,
+			...adminSchemas,
 		},
 	},
 };

@@ -35,6 +35,15 @@ const expectedPaths = [
 	"/api/v1/doctor/consultations/{id}/claim",
 	"/api/v1/doctor/consultations/{id}/review",
 	"/api/v1/doctor/consultations/{id}/status",
+	"/api/v1/admin/doctors",
+	"/api/v1/admin/doctors/{id}",
+	"/api/v1/admin/doctors/{id}/status",
+	"/api/v1/admin/patients",
+	"/api/v1/admin/patients/{id}",
+	"/api/v1/admin/patients/{id}/status",
+	"/api/v1/admin/consultations",
+	"/api/v1/admin/consultations/{id}",
+	"/api/v1/admin/audit-logs",
 ].sort();
 
 const protectedOperations = [
@@ -47,6 +56,17 @@ const protectedOperations = [
 	["/api/v1/doctor/consultations/{id}/claim", "patch"],
 	["/api/v1/doctor/consultations/{id}/review", "patch"],
 	["/api/v1/doctor/consultations/{id}/status", "patch"],
+	["/api/v1/admin/doctors", "get"],
+	["/api/v1/admin/doctors", "post"],
+	["/api/v1/admin/doctors/{id}", "get"],
+	["/api/v1/admin/doctors/{id}", "patch"],
+	["/api/v1/admin/doctors/{id}/status", "patch"],
+	["/api/v1/admin/patients", "get"],
+	["/api/v1/admin/patients/{id}", "get"],
+	["/api/v1/admin/patients/{id}/status", "patch"],
+	["/api/v1/admin/consultations", "get"],
+	["/api/v1/admin/consultations/{id}", "get"],
+	["/api/v1/admin/audit-logs", "get"],
 ] as const;
 
 const publicOperations = [
@@ -149,6 +169,21 @@ describe("OpenAPI document", () => {
 		expect(schemas).not.toContain("rawOutput");
 		expect(schemas).not.toContain("processingTimeMs");
 		expect(schemas).not.toContain("raw_output");
+		expect(schemas).not.toContain("processing_time_ms");
+	});
+
+	test("documents Admin management without passwords or raw AI fields", () => {
+		const schemas = JSON.stringify({
+			doctor: document.components.schemas.AdminDoctorProfile,
+			patient: document.components.schemas.AdminPatientProfile,
+			consultation: document.components.schemas.AdminConsultationDetailResponse,
+		});
+
+		expect(schemas).not.toContain("passwordHash");
+		expect(schemas).not.toContain("password_hash");
+		expect(schemas).not.toContain("rawOutput");
+		expect(schemas).not.toContain("raw_output");
+		expect(schemas).not.toContain("processingTimeMs");
 		expect(schemas).not.toContain("processing_time_ms");
 	});
 });

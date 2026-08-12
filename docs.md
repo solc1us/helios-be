@@ -1196,6 +1196,26 @@ State transition internal lain dilakukan oleh backend, bukan melalui endpoint in
 
 # 7. Admin Contract
 
+Seluruh endpoint pada bagian ini memerlukan JWT Admin melalui
+`authMiddleware` dan `adminOnly`. Endpoint bersifat non-destructive: akun
+Doctor/Patient hanya diaktifkan atau dinonaktifkan, sedangkan alur klinis
+konsultasi hanya dapat dipantau.
+
+## 7.0 Doctor and Patient Monitoring
+
+```http
+GET /api/v1/admin/doctors?status=active&search=pulmonologi&page=1&limit=10
+GET /api/v1/admin/doctors/:id
+
+GET /api/v1/admin/patients?status=active&search=pasien&page=1&limit=10
+GET /api/v1/admin/patients/:id
+```
+
+`page` default `1`, `limit` default `10`, dan batas maksimum `100`.
+Daftar diurutkan berdasarkan `created_at` terbaru. Respons akun tidak pernah
+memuat `passwordHash`; detail Patient juga tidak memuat riwayat kesehatan atau
+konsultasi secara otomatis.
+
 ## 7.1 Create Doctor
 
 ### Endpoint
@@ -1315,6 +1335,19 @@ GET /api/v1/admin/consultations
 
 Admin dapat melihat metadata konsultasi dan hasil analisis untuk kebutuhan monitoring sistem.
 
+Daftar konsultasi juga mendukung `patient_id` dan hanya mengambil relasi yang
+diperlukan. Endpoint detail berikut tersedia untuk inspeksi operasional:
+
+```http
+GET /api/v1/admin/consultations/:id
+```
+
+Detail dapat memuat keluhan lengkap, profil ringkas Patient/Doctor, analisis AI
+yang tervalidasi, dan DoctorReview. `AiAnalysis.rawOutput`,
+`processingTimeMs`, serta password hash tidak pernah dikembalikan. Admin tidak
+dapat mengubah status, assignment, hasil AI, atau DoctorReview melalui kontrak
+Phase 7.
+
 ---
 
 ## 7.6 Get Audit Logs
@@ -1330,6 +1363,7 @@ GET /api/v1/admin/audit-logs
 | Parameter         | Description                            |
 | ----------------- | -------------------------------------- |
 | `actor_type`      | `patient`, `doctor`, `admin`, `system` |
+| `actor_id`        | Filter ID aktor                        |
 | `action`          | Filter action                          |
 | `consultation_id` | Filter konsultasi                      |
 | `page`            | Halaman                                |
@@ -1354,13 +1388,25 @@ GET /api/v1/admin/audit-logs
 		],
 		"pagination": {
 			"page": 1,
-			"limit": 20,
+			"limit": 10,
 			"total": 1,
 			"total_pages": 1
 		}
 	}
 }
 ```
+
+Action Admin yang dicatat pada Phase 7:
+
+```text
+ADMIN_CREATE_DOCTOR
+ADMIN_UPDATE_DOCTOR
+ADMIN_UPDATE_ACCOUNT_STATUS
+ADMIN_VIEW_CONSULTATION
+```
+
+Deskripsi audit hanya berisi metadata operasional dan tidak memuat password,
+keluhan, output AI mentah, catatan review, atau teks kesehatan bebas.
 
 ---
 
