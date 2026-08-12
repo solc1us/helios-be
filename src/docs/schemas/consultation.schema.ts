@@ -243,11 +243,12 @@ export const consultationSchemas = {
 						},
 					},
 					doctor_review: {
-						type: "object",
+						allOf: [
+							{ $ref: "#/components/schemas/PatientSafeDoctorReview" },
+						],
 						nullable: true,
-						additionalProperties: false,
 						description:
-							"Currently null in the implemented Patient Consultation detail response.",
+							"Confirmed Doctor review fields. Null before review; excludes review_note and Doctor identity.",
 						example: null,
 					},
 				},

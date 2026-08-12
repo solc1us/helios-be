@@ -931,7 +931,9 @@ GET /api/v1/patient/consultations/:id
 Hasil `ai_analysis` tidak dikirim kepada pasien karena AI digunakan sebagai decision-support/pre-screening untuk dokter.
 
 Pada kontrak Patient Consultation yang saat ini diimplementasikan,
-`doctor_review` bernilai `null`.
+`doctor_review` bernilai `null` sebelum review. Setelah review, Patient hanya
+menerima `final_category`, `final_urgency_level`, `recommendation`, dan
+`reviewed_at`; `review_note` serta identitas dokter tidak diekspos.
 
 ### Response — `404 Not Found`
 
@@ -964,7 +966,6 @@ GET /api/v1/doctor/consultations
 | `scope=available` | Konsultasi `analyzed` yang belum memiliki dokter |
 | `scope=mine`      | Konsultasi yang sedang/sempat ditangani dokter   |
 | `status`          | Filter status                                    |
-| `urgency_level`   | Filter urgensi                                   |
 | `page`            | Halaman                                          |
 | `limit`           | Jumlah data                                      |
 
@@ -978,21 +979,14 @@ GET /api/v1/doctor/consultations
 		"items": [
 			{
 				"id": "consultation-uuid",
-				"patient": {
-					"id": "patient-uuid",
-					"name": "Budi Santoso",
-					"gender": "male",
-					"birth_date": "2001-05-10"
-				},
-				"complaint_preview": "Saya demam, batuk, dan nyeri tenggorokan...",
+				"complaint_text": "Saya demam, batuk, dan nyeri tenggorokan...",
 				"status": "analyzed",
-				"ai_analysis": {
-					"possible_category": "keluhan pernapasan",
-					"severity_level": "medium",
-					"urgency_level": "normal",
-					"confidence_score": 0.82
-				},
-				"created_at": "2026-08-11T10:00:00Z"
+				"created_at": "2026-08-11T10:00:00Z",
+				"assigned_at": null,
+				"ai_summary": "Pasien memerlukan evaluasi lebih lanjut oleh dokter.",
+				"possible_category": "keluhan pernapasan",
+				"urgency_level": "normal",
+				"confidence_score": 0.82
 			}
 		],
 		"pagination": {
@@ -1004,6 +998,11 @@ GET /api/v1/doctor/consultations
 	}
 }
 ```
+
+`scope=available` selalu membatasi hasil ke konsultasi `analyzed` tanpa dokter.
+`scope=mine` selalu membatasi hasil ke `doctor_id` dari token. Filter `status`
+tidak dapat memperluas kedua batas akses tersebut. List tidak mengirim
+`raw_output` atau `processing_time_ms`.
 
 ---
 
@@ -1043,11 +1042,17 @@ GET /api/v1/doctor/consultations/:id
 			"urgency_level": "normal",
 			"doctor_note_suggestion": "Perlu konfirmasi suhu tubuh dan apakah terdapat sesak napas.",
 			"confidence_score": 0.82,
-			"model_version": "model-v1"
-		}
+			"model_version": "dummy-v1"
+		},
+		"doctor_review": null
 	}
 }
 ```
+
+Dokter hanya dapat membuka consultation `analyzed` yang belum diambil atau
+consultation miliknya sendiri. Resource milik dokter lain menggunakan response
+404 yang sama dengan resource yang tidak ada. Detail AI tidak mengirim
+`raw_output` atau `processing_time_ms`.
 
 ---
 
@@ -1092,7 +1097,7 @@ doctor_id = null
 ```json
 {
 	"success": false,
-	"message": "Konsultasi sudah diambil oleh dokter lain.",
+	"message": "Konsultasi tidak dapat diambil.",
 	"errors": []
 }
 ```
@@ -1134,8 +1139,6 @@ consultation.status = in_review
 	"data": {
 		"review": {
 			"id": "review-uuid",
-			"consultation_id": "consultation-uuid",
-			"doctor_id": "doctor-uuid",
 			"review_note": "Keluhan pasien masih tergolong ringan tetapi perlu dipantau.",
 			"final_category": "keluhan pernapasan",
 			"final_urgency_level": "normal",
@@ -1172,6 +1175,22 @@ reviewed → closed
 ```
 
 State transition internal lain dilakukan oleh backend, bukan melalui endpoint ini.
+
+### Response — `200 OK`
+
+```json
+{
+	"success": true,
+	"message": "Konsultasi berhasil ditutup.",
+	"data": {
+		"consultation": {
+			"id": "consultation-uuid",
+			"status": "closed",
+			"closed_at": "2026-08-11T12:00:00Z"
+		}
+	}
+}
+```
 
 ---
 

@@ -1,4 +1,7 @@
-import { ConsultationStatus } from "../generated/prisma/enums";
+import {
+	ConsultationStatus,
+	type UrgencyLevel,
+} from "../generated/prisma/enums";
 
 import { prisma } from "../config/database.config";
 
@@ -9,6 +12,15 @@ export interface ConsultationRecord {
 	doctorId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+export interface PatientConsultationDetailRecord extends ConsultationRecord {
+	reviewedAt: Date | null;
+	review: {
+		finalCategory: string | null;
+		finalUrgencyLevel: UrgencyLevel | null;
+		recommendation: string | null;
+	} | null;
 }
 
 export interface DecimalValue {
@@ -144,10 +156,20 @@ export const consultationRepository = {
 	findByIdAndPatient(
 		id: string,
 		patientId: string,
-	): Promise<ConsultationRecord | null> {
+	): Promise<PatientConsultationDetailRecord | null> {
 		return prisma.consultation.findFirst({
 			where: { id, patientId },
-			select: consultationSelect,
+			select: {
+				...consultationSelect,
+				reviewedAt: true,
+				review: {
+					select: {
+						finalCategory: true,
+						finalUrgencyLevel: true,
+						recommendation: true,
+					},
+				},
+			},
 		});
 	},
 };

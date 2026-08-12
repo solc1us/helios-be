@@ -30,6 +30,11 @@ const expectedPaths = [
 	"/api/v1/auth/me",
 	"/api/v1/patient/consultations",
 	"/api/v1/patient/consultations/{id}",
+	"/api/v1/doctor/consultations",
+	"/api/v1/doctor/consultations/{id}",
+	"/api/v1/doctor/consultations/{id}/claim",
+	"/api/v1/doctor/consultations/{id}/review",
+	"/api/v1/doctor/consultations/{id}/status",
 ].sort();
 
 const protectedOperations = [
@@ -37,6 +42,11 @@ const protectedOperations = [
 	["/api/v1/patient/consultations", "post"],
 	["/api/v1/patient/consultations", "get"],
 	["/api/v1/patient/consultations/{id}", "get"],
+	["/api/v1/doctor/consultations", "get"],
+	["/api/v1/doctor/consultations/{id}", "get"],
+	["/api/v1/doctor/consultations/{id}/claim", "patch"],
+	["/api/v1/doctor/consultations/{id}/review", "patch"],
+	["/api/v1/doctor/consultations/{id}/status", "patch"],
 ] as const;
 
 const publicOperations = [
@@ -127,5 +137,18 @@ describe("OpenAPI document", () => {
 		expect(aiProperties).not.toHaveProperty("processingTimeMs");
 		expect(aiProperties).not.toHaveProperty("raw_output");
 		expect(aiProperties).not.toHaveProperty("processing_time_ms");
+	});
+
+	test("documents Doctor workflow without internal AI fields", () => {
+		const schemas = JSON.stringify({
+			list: document.components.schemas.DoctorConsultationListResponse,
+			detail: document.components.schemas.DoctorConsultationDetailResponse,
+		});
+
+		expect(schemas).toContain("DoctorAiAnalysis");
+		expect(schemas).not.toContain("rawOutput");
+		expect(schemas).not.toContain("processingTimeMs");
+		expect(schemas).not.toContain("raw_output");
+		expect(schemas).not.toContain("processing_time_ms");
 	});
 });

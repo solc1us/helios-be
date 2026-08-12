@@ -188,7 +188,15 @@ export class ConsultationService {
 				created_at: consultation.createdAt.toISOString(),
 				updated_at: consultation.updatedAt.toISOString(),
 			},
-			doctor_review: null,
+			doctor_review: consultation.review
+				? {
+						final_category: consultation.review.finalCategory,
+						final_urgency_level:
+							consultation.review.finalUrgencyLevel?.toLowerCase() ?? null,
+						recommendation: consultation.review.recommendation,
+						reviewed_at: consultation.reviewedAt?.toISOString() ?? null,
+					}
+				: null,
 		};
 	}
 }

@@ -454,16 +454,26 @@ timing. A real model adapter remains deferred.
 
 ---
 
-### Phase 6 — Next
+### Phase 6 — Doctor Consultation & Review: Complete
 
-Doctor Consultation & Review.
+Doctors now have ownership-safe `available` and `mine` consultation queues,
+safe AI detail access, atomic consultation claim, transactional one-time
+`DoctorReview` creation, and the `ANALYZED -> IN_REVIEW -> REVIEWED -> CLOSED`
+workflow. Patient detail exposes only confirmed safe review fields, while the
+existing Patient dashboard automatically incorporates reviewed categories and
+confidence. Doctor view, claim, review, and status changes are audited.
+
+---
+
+### Phase 7 — Next
+
+Admin Management.
 
 ---
 
 ## 10. Remaining Roadmap
 
 ```text
-Phase 6  Doctor Consultation & Review
 Phase 7  Admin Management
 Phase 8  Security & Validation Hardening
 Phase 9  Testing & API Documentation

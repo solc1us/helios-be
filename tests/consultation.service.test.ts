@@ -1,6 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
 
-import { ConsultationStatus } from "../src/generated/prisma/enums";
+import {
+	ConsultationStatus,
+	UrgencyLevel,
+} from "../src/generated/prisma/enums";
 import { DUMMY_AI_OUTPUT } from "../src/adapters/dummyAiModel.adapter";
 
 import type {
@@ -8,6 +11,7 @@ import type {
 	ConsultationRepository,
 	DecimalValue,
 	PatientConsultationListRecord,
+	PatientConsultationDetailRecord,
 	PatientDashboardStatisticsRecord,
 } from "../src/repositories/consultation.repository";
 import {
@@ -28,6 +32,12 @@ const consultation: ConsultationRecord = {
 	doctorId: null,
 	createdAt,
 	updatedAt,
+};
+
+const patientDetailConsultation: PatientConsultationDetailRecord = {
+	...consultation,
+	reviewedAt: null,
+	review: null,
 };
 
 const dummyAiAnalysis: ValidatedAiModelOutput = {
@@ -326,7 +336,7 @@ describe("ConsultationService dashboard statistics", () => {
 
 describe("ConsultationService detail", () => {
 	test("returns an owned consultation without AI analysis", async () => {
-		const lookup = mock(async () => consultation);
+		const lookup = mock(async () => patientDetailConsultation);
 		const service = createService({ findByIdAndPatient: lookup });
 
 		const result = await service.getDetailForPatient(
@@ -365,5 +375,34 @@ describe("ConsultationService detail", () => {
 			service.getDetailForPatient(consultation.id, "other-patient"),
 		).rejects.toMatchObject({ statusCode: 404 });
 		expect(lookup).toHaveBeenCalledWith(consultation.id, "other-patient");
+	});
+
+	test("returns only patient-safe confirmed Doctor review fields", async () => {
+		const reviewedAt = new Date("2026-08-12T11:00:00.000Z");
+		const reviewed: PatientConsultationDetailRecord = {
+			...patientDetailConsultation,
+			status: ConsultationStatus.REVIEWED,
+			reviewedAt,
+			review: {
+				finalCategory: "keluhan pernapasan",
+				finalUrgencyLevel: UrgencyLevel.NORMAL,
+				recommendation: "Pantau gejala.",
+			},
+		};
+		const service = createService({ findByIdAndPatient: async () => reviewed });
+
+		const result = await service.getDetailForPatient(
+			consultation.id,
+			"authenticated-patient",
+		);
+
+		expect(result.doctor_review).toEqual({
+			final_category: "keluhan pernapasan",
+			final_urgency_level: "normal",
+			recommendation: "Pantau gejala.",
+			reviewed_at: reviewedAt.toISOString(),
+		});
+		expect(result.doctor_review).not.toHaveProperty("review_note");
+		expect(result.doctor_review).not.toHaveProperty("doctorId");
 	});
 });

@@ -2,10 +2,12 @@ import type { JsonObject } from "swagger-ui-express";
 
 import { authPaths } from "./paths/auth.paths";
 import { healthPaths } from "./paths/health.paths";
+import { doctorPaths } from "./paths/doctor.paths";
 import { patientPaths } from "./paths/patient.paths";
 import { authSchemas } from "./schemas/auth.schema";
 import { commonSchemas } from "./schemas/common.schema";
 import { consultationSchemas } from "./schemas/consultation.schema";
+import { doctorConsultationSchemas } from "./schemas/doctorConsultation.schema";
 
 export const openApiDocument: JsonObject = {
 	openapi: "3.0.3",
@@ -31,11 +33,16 @@ export const openApiDocument: JsonObject = {
 			name: "Patient",
 			description: "Authenticated patient consultation operations.",
 		},
+		{
+			name: "Doctor",
+			description: "Doctor consultation queue, claim, review, and close operations.",
+		},
 	],
 	paths: {
 		...healthPaths,
 		...authPaths,
 		...patientPaths,
+		...doctorPaths,
 	},
 	components: {
 		securitySchemes: {
@@ -50,6 +57,7 @@ export const openApiDocument: JsonObject = {
 			...commonSchemas,
 			...authSchemas,
 			...consultationSchemas,
+			...doctorConsultationSchemas,
 		},
 	},
 };
